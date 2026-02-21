@@ -1,0 +1,231 @@
+\documentclass[11pt]{article}
+
+% ---------- Packages ----------
+\usepackage[margin=1in]{geometry}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage{setspace}
+
+% ---------- Styling ----------
+\definecolor{primary}{HTML}{1D263B}
+\definecolor{accent}{HTML}{517664}
+
+\hypersetup{
+colorlinks=true,
+linkcolor=primary,
+urlcolor=accent
+}
+
+\titleformat{\section}{\Large\bfseries\color{primary}}{}{0em}{}
+\titleformat{\subsection}{\large\bfseries\color{accent}}{}{0em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{AI Stock Predictor}
+\lhead{Derin Works}
+\cfoot{\thepage}
+
+\setstretch{1.15}
+
+% ---------- Title ----------
+\title{\textbf{AI Stock Predictor}\\
+\large Multi-Model Autonomous Prediction System}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+\begin{tcolorbox}[colback=primary!5,colframe=primary,width=0.9\textwidth]
+Local-first autonomous AI system for stock prediction using discrete action outputs, multi-model experimentation, and continuous model evolution.
+\end{tcolorbox}
+\end{center}
+
+% ------------------------------------------------
+\section*{Overview}
+
+AI Stock Predictor is an experimental AI platform designed to:
+
+\begin{itemize}[leftmargin=1.5em]
+\item Run multiple AI models simultaneously
+\item Produce N outputs per model (outputs 1..N)
+\item Restrict outputs to discrete values between 0.00 and 0.35
+\item Map outputs directly to operational trading actions
+\item Ingest full webpages as binary inputs plus structured market data
+\item Continuously generate alternative models via randomized mutation
+\item Automatically promote better-performing models
+\item Track portfolio profitability as the primary evaluation metric
+\item Provide a monitoring dashboard for observability
+\end{itemize}
+
+Full system design details are documented in \texttt{ARCHITECTURE.md}.
+
+% ------------------------------------------------
+\section*{Core Concepts}
+
+\subsection*{Discrete Action Output Contract}
+
+Each model produces:
+
+\begin{verbatim}
+scores: List[float]
+\end{verbatim}
+
+Outputs must normalize to the following discrete action values:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Score & Action \
+\midrule
+0.35 & Invest \
+0.30 & Divest \
+0.25 & Buy shares \
+0.20 & Sell shares \
+0.15 & Convert currency \
+0.10 & Explore new/random site \
+0.05 & Analyze similar site \
+0.00 & Wait / No action \
+\bottomrule
+\end{tabular}
+\end{center}
+
+A normalization layer enforces this contract before any operational decision.
+
+% ------------------------------------------------
+\subsection*{Multi-Model Runtime}
+
+The runtime system executes:
+
+\begin{itemize}
+\item One baseline model
+\item N continuously evolving alternative models
+\end{itemize}
+
+Models are evaluated independently using profitability, stability, and loss-reduction metrics.
+
+% ------------------------------------------------
+\subsection*{Continuous Model Evolution}
+
+Model variants may be created via:
+
+\begin{itemize}
+\item Architecture changes
+\item Parameter mutation
+\item Feature pipeline adjustments
+\item Training window variation
+\end{itemize}
+
+Better-performing models are automatically promoted, with full audit logging.
+
+% ------------------------------------------------
+\subsection*{Data Inputs}
+
+Supported inputs include:
+
+\begin{itemize}
+\item Raw binary webpage ingestion
+\item Market price feeds
+\item Financial APIs
+\item News and sentiment data
+\item Economic indicators
+\end{itemize}
+
+All inputs normalize into a shared feature representation.
+
+% ------------------------------------------------
+\subsection*{Portfolio Evaluation}
+
+Current simplified rule:
+
+\begin{quote}
+A model is considered better if it produces more profit or consistently smaller losses.
+\end{quote}
+
+Advanced trading risk controls remain future work.
+
+% ------------------------------------------------
+\subsection*{Feedback and Logging}
+
+Each prediction cycle records:
+
+\begin{itemize}
+\item Model version
+\item Inputs used
+\item Raw and normalized outputs
+\item Interpreted actions
+\item Portfolio state snapshot
+\item Resulting profit or loss
+\end{itemize}
+
+This data supports retraining and long-term evaluation.
+
+% ------------------------------------------------
+\subsection*{Monitoring Dashboard}
+
+Minimum dashboard capabilities:
+
+\begin{itemize}
+\item Prediction outputs per model
+\item Portfolio performance visualization
+\item Model comparison metrics
+\item Promotion history
+\item Historical prediction charts
+\item Webpage ingestion visibility
+\end{itemize}
+
+% ------------------------------------------------
+\section*{Deployment Strategy}
+
+\subsection*{Phase 1 --- Local First}
+
+\begin{itemize}
+\item Single-machine operation
+\item Minimal infrastructure assumptions
+\end{itemize}
+
+\subsection*{Phase 2 --- Cloud (Future)}
+
+Cloud deployment remains optional but architecturally supported.
+
+% ------------------------------------------------
+\section*{Technology Preferences}
+
+\begin{itemize}
+\item Primary ecosystem: Python
+\item Flexible ML framework selection
+\item Must support multi-model experimentation
+\end{itemize}
+
+% ------------------------------------------------
+\section*{Suggested Repository Structure}
+
+\begin{verbatim}
+README.tex
+ARCHITECTURE.md
+AGENTS.md
+models/
+data/
+training/
+dashboards/
+docs/
+\end{verbatim}
+
+% ------------------------------------------------
+\section*{Project Status}
+
+This repository defines a continuous autonomous experimentation platform for AI-driven stock prediction and adaptive model evolution.
+
+\vfill
+\begin{center}
+\textcolor{accent}{Derin Works LLC}
+\end{center}
+
+\end{document}
