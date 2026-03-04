@@ -26,9 +26,12 @@ class NormalizedOutput:
     action: str
 
 
-def normalize_score(raw: float) -> float:
-    """Return nearest discrete score, clamped to contract values."""
-    return min(ALLOWED_SCORES, key=lambda allowed: abs(allowed - raw))
+def normalize_score(raw: float, tolerance: float = 1e-9) -> float:
+    """Return raw score only when it matches the discrete contract; otherwise no-op (0.00)."""
+    for allowed in ALLOWED_SCORES:
+        if abs(raw - allowed) <= tolerance:
+            return allowed
+    return 0.00
 
 
 def interpret_score(raw: float) -> NormalizedOutput:

@@ -1,49 +1,188 @@
 # AI Stock Predictor
 
-Local-first multi-model autonomous prediction simulator with strict discrete action outputs.
+Multi-Model Autonomous Prediction System with Discrete 0.00–0.35 Action Outputs, Webpage Binary Inputs, and Continuous Model Evolution.
 
-## Implemented Scope
+---
 
-- Multi-model inference (baseline + N alternatives) with outputs `1..N` per model.
-- Strict score normalization to contract values: `0.35, 0.30, 0.25, 0.20, 0.15, 0.10, 0.05, 0.00`.
-- Webpage binary ingestion + structured market/news/economic features.
-- Continuous candidate generation through deterministic model mutation.
-- Autonomous promotion when a candidate yields higher profitability or lower loss.
-- Append-only JSONL logs for predictions and promotions.
-- Minimal practical dashboard generated as local HTML from logs.
-- Reproducible execution via explicit random seeds.
-- Local-first execution; cloud deployment remains TODO.
+## Overview
 
-## Quickstart
+AI Stock Predictor is a local-first experimental system designed to:
+
+* Run multiple AI models simultaneously
+* Produce N outputs per model (outputs 1..N)
+* Restrict outputs to discrete values between 0.00 and 0.35
+* Map outputs to operational actions
+* Ingest full webpages as binary inputs alongside structured market data
+* Continuously generate alternative models via randomized modification
+* Automatically promote better-performing models
+* Track portfolio performance primarily by profitability
+* Provide a practical monitoring dashboard
+
+This repository focuses on autonomous model experimentation and profitability-driven evaluation.
+
+For full architectural details, see `ARCHITECTURE.md`.
+
+---
+
+## Implementation Status
+
+Current implementation includes:
+
+- Python package runtime under `src/ai_stock_predictor/`.
+- Baseline + N alternative model evaluation per cycle.
+- Strict discrete action contract enforcement where non-contract values resolve to `0.00` (`wait`).
+- Binary webpage ingestion plus structured data feature vectorization.
+- Reproducible model behavior via explicit deterministic seeds.
+- Append-only JSONL logs:
+  - `logs/predictions.jsonl`
+  - `logs/promotions.jsonl`
+- Local HTML dashboard generation at `dashboards/index.html`.
+- Simulation-only portfolio logic (no live trading execution).
+
+Run one simulation cycle:
 
 ```bash
-python -m ai_stock_predictor
+PYTHONPATH=src python -m ai_stock_predictor
 ```
 
-Outputs:
-
-- `logs/predictions.jsonl`
-- `logs/promotions.jsonl`
-- `dashboards/index.html`
-
-## Development
+Run tests:
 
 ```bash
-python -m pip install -e .[dev]
 pytest
 ```
 
-## Discrete Output Contract
+---
 
-| Score | Action |
-|---|---|
-| 0.35 | invest |
-| 0.30 | divest |
-| 0.25 | buy_shares |
-| 0.20 | sell_shares |
-| 0.15 | convert_currency |
-| 0.10 | explore_new_random_site |
-| 0.05 | analyze_similar_site |
-| 0.00 | wait |
+# Core Concepts
 
-Values are always normalized to this contract before action interpretation.
+## 1. Discrete Action Output Contract
+
+Each model produces:
+
+```
+scores: List[float]
+```
+
+Outputs are restricted to the following discrete values:
+
+| Score | Action                  |
+|-------|-------------------------|
+| 0.35  | Invest                  |
+| 0.30  | Divest                  |
+| 0.25  | Buy shares              |
+| 0.20  | Sell shares             |
+| 0.15  | Convert currency        |
+| 0.10  | Explore new/random site |
+| 0.05  | Analyze similar site    |
+| 0.00  | Wait / No action        |
+
+All outputs pass through a normalization layer before action execution.
+
+Values outside this contract must not trigger actions.
+
+---
+
+## 2. Multi-Model Runtime
+
+At runtime the system executes:
+
+* 1 baseline model
+* N alternative models
+
+Each model produces its own output vector and is evaluated independently.
+
+Primary evaluation criteria:
+
+* Profitability
+* Loss reduction
+* Stability
+
+---
+
+## 3. Continuous Model Evolution
+
+Alternative models are generated automatically during training using strategies such as:
+
+* Architecture variation
+* Parameter mutation
+* Feature adjustments
+* Training window changes
+
+If a candidate model performs better (more profit or consistently lower loss), it is automatically promoted.
+
+Promotion events are logged.
+
+---
+
+## 4. Data Inputs
+
+The system supports:
+
+* Full webpage ingestion as raw binary
+* Market price data
+* Financial APIs
+* News / sentiment sources
+* Structured economic indicators
+
+All inputs are normalized into a common feature representation before model ingestion.
+
+---
+
+## 5. Portfolio Evaluation (Initial Rule)
+
+Current simplified rule:
+
+> A model is better if it makes more money or loses less money.
+
+Advanced risk management and real trading execution are future enhancements.
+
+---
+
+## 6. Feedback & Logging
+
+Every prediction cycle records:
+
+* Model version
+* Inputs used
+* Raw outputs
+* Normalized outputs
+* Interpreted actions
+* Portfolio state
+* Profit / loss outcome
+
+This data supports retraining, comparison, and long-term evaluation.
+
+---
+
+## 7. Monitoring Dashboard
+
+Minimum dashboard functionality includes:
+
+* Model prediction outputs
+* Portfolio performance charts
+* Model comparison metrics
+* Promotion history
+* Historical prediction visualization
+* Webpage ingestion visibility
+
+---
+
+# Deployment Strategy
+
+## Phase 1 — Local First
+
+* Runs on a single local machine
+* Minimal infrastructure assumptions
+
+## Phase 2 — Cloud (Future)
+
+* Optional cloud deployment
+* Architecture designed to remain cloud-compatible
+
+---
+
+# Technology Preferences
+
+* Primary ecosystem: Python
+* ML framework flexible
+* Must support multimodel experimentation and reproducibility

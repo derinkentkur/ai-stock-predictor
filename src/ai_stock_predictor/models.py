@@ -16,16 +16,22 @@ class ModelSpec:
     seed: int
 
     def predict(self, features: list[float], outputs: int) -> list[float]:
+        """Generate contract-compliant scores deterministically."""
         rng = random.Random(self.seed + int(sum(features) * 10_000))
         values: list[float] = []
         for index in range(outputs):
-            base = self.bias
+            signal = self.bias
             for weight_index, weight in enumerate(self.weights):
                 feature = features[weight_index % len(features)]
-                base += weight * feature
-            noise = rng.uniform(-0.08, 0.08)
-            jitter = (index * 0.01) - 0.015
-            values.append(base + noise + jitter)
+                signal += weight * feature
+            signal += rng.uniform(-0.15, 0.15)
+            signal += (index * 0.02) - 0.03
+
+            # Map deterministic signal into one of the allowed bins (exact contract value).
+            bounded = max(0.0, min(0.35, signal))
+            bucket = int(round((bounded / 0.35) * (len(ALLOWED_SCORES) - 1)))
+            score = ALLOWED_SCORES[bucket]
+            values.append(score)
         return values
 
 
@@ -39,7 +45,6 @@ def mutate_model(source: ModelSpec, mutation_id: int, rng: random.Random) -> Mod
     candidate_weights[idx] += rng.uniform(-0.09, 0.09)
     candidate_bias = source.bias + rng.uniform(-0.04, 0.04)
 
-    # Keep signal in contract neighborhood for stable normalization.
     candidate_bias = max(min(candidate_bias, max(ALLOWED_SCORES)), min(ALLOWED_SCORES))
     return ModelSpec(
         version=f"{source.version}-alt-{mutation_id}",
