@@ -24,6 +24,35 @@ For full architectural details, see `ARCHITECTURE.md`.
 
 ---
 
+## Implementation Status
+
+Current implementation includes:
+
+- Python package runtime under `src/ai_stock_predictor/`.
+- Baseline + N alternative model evaluation per cycle.
+- Strict discrete action contract enforcement where non-contract values resolve to `0.00` (`wait`).
+- Binary webpage ingestion plus structured data feature vectorization.
+- Reproducible model behavior via explicit deterministic seeds.
+- Append-only JSONL logs:
+  - `logs/predictions.jsonl`
+  - `logs/promotions.jsonl`
+- Local HTML dashboard generation at `dashboards/index.html`.
+- Simulation-only portfolio logic (no live trading execution).
+
+Run one simulation cycle:
+
+```bash
+PYTHONPATH=src python -m ai_stock_predictor
+```
+
+Run tests:
+
+```bash
+pytest
+```
+
+---
+
 # Core Concepts
 
 ## 1. Discrete Action Output Contract
@@ -157,26 +186,3 @@ Minimum dashboard functionality includes:
 * Primary ecosystem: Python
 * ML framework flexible
 * Must support multimodel experimentation and reproducibility
-
----
-
-# Repository Structure (Suggested)
-
-```
-README.md
-ARCHITECTURE.md
-AGENTS.md
-models/
-data/
-training/
-dashboards/
-docs/
-```
-
----
-
-# Status
-
-This project defines a continuous autonomous experimentation system for AI-driven stock prediction and model evolution.
-
-Refer to `ARCHITECTURE.md` for the complete system design and lifecycle specification.
