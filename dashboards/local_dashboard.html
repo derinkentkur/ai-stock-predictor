@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Stock Predictor Dashboard</title>
+  <style>
+    :root {
+      --bg: #f4efe4;
+      --panel: rgba(255, 255, 255, 0.82);
+      --ink: #132238;
+      --accent: #be5a2c;
+      --accent-soft: #ffd0b8;
+      --line: rgba(19, 34, 56, 0.14);
+      --success: #1b7f5b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(190, 90, 44, 0.18), transparent 24rem),
+        radial-gradient(circle at right, rgba(27, 127, 91, 0.15), transparent 20rem),
+        linear-gradient(160deg, #f4efe4 0%, #f8f4ec 45%, #ece5d3 100%);
+      min-height: 100vh;
+    }
+    main {
+      width: min(1100px, calc(100vw - 2rem));
+      margin: 0 auto;
+      padding: 2rem 0 3rem;
+    }
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.04em;
+    }
+    p {
+      margin: 0 0 1rem;
+      line-height: 1.5;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 1.2rem;
+      padding: 1.1rem 1.2rem;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 10px 30px rgba(19, 34, 56, 0.06);
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-top: 0.3rem;
+    }
+    .muted {
+      color: rgba(19, 34, 56, 0.68);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      padding: 0.7rem 0.4rem;
+      vertical-align: top;
+    }
+    th {
+      font-size: 0.82rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(19, 34, 56, 0.68);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .chart {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+    .line {
+      display: grid;
+      grid-template-columns: 10rem 1fr;
+      gap: 0.8rem;
+      align-items: center;
+    }
+    .track {
+      position: relative;
+      height: 0.6rem;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(19, 34, 56, 0.08);
+    }
+    .fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--success));
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      font-size: 0.82rem;
+      margin-right: 0.35rem;
+      margin-bottom: 0.35rem;
+    }
+    @media (max-width: 800px) {
+      .hero, .stats, .grid {
+        grid-template-columns: 1fr;
+      }
+      .line {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <article class="panel">
+        <h1>AI Stock Predictor Dashboard</h1>
+        <p class="muted">Local-first multimodel monitoring with binary webpage ingestion, structured market data, automatic candidate evolution, and autonomous promotion. Live trading is intentionally disabled.</p>
+        <div class="chip">Primary model: candidate-g1-m0</div>
+      </article>
+      <article class="panel">
+        <p class="muted">Prediction log entries</p>
+        <div class="stat-value">16</div>
+        <p class="muted">Promotion events: 2</p>
+      </article>
+    </section>
+    <section class="stats">
+      <article class="panel">
+        <p class="muted">Archived primaries</p>
+        <div class="stat-value" id="archivedCount">0</div>
+      </article>
+      <article class="panel">
+        <p class="muted">Active models</p>
+        <div class="stat-value" id="activeCount">0</div>
+      </article>
+      <article class="panel">
+        <p class="muted">Tracked cycles</p>
+        <div class="stat-value" id="cycleCount">0</div>
+      </article>
+    </section>
+    <section class="grid">
+      <article class="panel">
+        <h2>Portfolio Performance</h2>
+        <div class="chart" id="chart"></div>
+      </article>
+      <article class="panel">
+        <h2>Promotion History</h2>
+        <table>
+          <thead>
+            <tr><th>Cycle</th><th>From</th><th>To</th><th>Reason</th></tr>
+          </thead>
+          <tbody id="promotionRows"></tbody>
+        </table>
+      </article>
+    </section>
+    <section class="grid">
+      <article class="panel">
+        <h2>Latest Model Outputs</h2>
+        <table>
+          <thead>
+            <tr><th>Model</th><th>Role</th><th>Outputs</th><th>Actions</th><th>P/L</th></tr>
+          </thead>
+          <tbody id="latestRows"></tbody>
+        </table>
+      </article>
+      <article class="panel">
+        <h2>Webpage Ingestion Activity</h2>
+        <table>
+          <thead>
+            <tr><th>Cycle</th><th>Model</th><th>Webpage</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="ingestionRows"></tbody>
+        </table>
+      </article>
+    </section>
+  </main>
+  <script>
+    const payload = {"cycles": [0, 1, 2, 3], "ingestion": [{"actions": ["Explore new/random site", "Sell shares", "Buy shares", "Sell shares"], "cycle_index": 0, "model_id": "baseline-v1", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/earnings_signal.html", "webpage_sha256": "970f0cc20145a3396b00435d8dbf7591ad6d9a5d3805787b96e5251d6b3c6259"}, {"actions": ["Convert currency", "Sell shares", "Buy shares", "Convert currency"], "cycle_index": 0, "model_id": "candidate-g0-m0", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/earnings_signal.html", "webpage_sha256": "970f0cc20145a3396b00435d8dbf7591ad6d9a5d3805787b96e5251d6b3c6259"}, {"actions": ["Explore new/random site", "Sell shares", "Buy shares", "Sell shares"], "cycle_index": 0, "model_id": "candidate-g0-m1", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/earnings_signal.html", "webpage_sha256": "970f0cc20145a3396b00435d8dbf7591ad6d9a5d3805787b96e5251d6b3c6259"}, {"actions": ["Explore new/random site", "Sell shares", "Buy shares", "Convert currency"], "cycle_index": 0, "model_id": "candidate-g0-m2", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/earnings_signal.html", "webpage_sha256": "970f0cc20145a3396b00435d8dbf7591ad6d9a5d3805787b96e5251d6b3c6259"}, {"actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 1, "model_id": "baseline-v1", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}, {"actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 1, "model_id": "candidate-g0-m0", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}, {"actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 1, "model_id": "candidate-g0-m2", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}, {"actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 1, "model_id": "candidate-g1-m0", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}, {"actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 2, "model_id": "baseline-v1", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}, {"actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 2, "model_id": "candidate-g0-m0", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}, {"actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 2, "model_id": "candidate-g0-m2", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}, {"actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 2, "model_id": "candidate-g1-m0", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}, {"actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 3, "model_id": "baseline-v1", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}, {"actions": ["Convert currency", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 3, "model_id": "candidate-g0-m0", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}, {"actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 3, "model_id": "candidate-g0-m2", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}, {"actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "cycle_index": 3, "model_id": "candidate-g1-m0", "webpage_path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "webpage_sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}], "latest": {"baseline-v1": {"cycle_index": 3, "cycle_pnl": 5.7, "execution_log": [{"action": "Explore new/random site", "quantity": 0}, {"action": "Buy shares", "price": 103.95, "quantity": 1}, {"action": "Buy shares", "price": 103.95, "quantity": 1}, {"action": "Sell shares", "price": 103.95, "quantity": 1}], "inputs": {"feature_names": ["close_scaled", "intraday_return", "range_ratio", "momentum_3", "momentum_5", "volume_scaled", "page_size_scaled", "unique_byte_ratio", "html_tag_ratio", "alpha_ratio", "digit_ratio", "entropy_ratio", "hash_signal"], "market": {"close": 103.95, "high": 105.7, "low": 103.1, "next_close": 105.85, "open": 104.4, "symbol": "AISP", "timestamp": "2026-03-05", "volume": 3010000}, "webpage": {"bytes": 633, "path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}}, "interpreted_actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "metrics": {"cumulative_pnl": 5.65, "cycles": 4, "loss_abs": 0.0, "stability": 2.5516}, "model_id": "baseline-v1", "mutations": [], "normalized_outputs": [0.1, 0.25, 0.25, 0.2], "portfolio_state": {"cash": 9688.1, "cumulative_pnl": 5.65, "currency_reserve": 0.0, "shares": 3, "total_value": 10005.65}, "raw_outputs": [0.11646, 0.235866, 0.262714, 0.190494], "role": "baseline", "timestamp_utc": "2026-03-15T12:17:01.579119+00:00", "version": "baseline-v1"}, "candidate-g0-m0": {"cycle_index": 3, "cycle_pnl": 7.6, "execution_log": [{"action": "Convert currency", "amount": 250.0}, {"action": "Buy shares", "price": 103.95, "quantity": 1}, {"action": "Buy shares", "price": 103.95, "quantity": 1}, {"action": "Sell shares", "price": 103.95, "quantity": 1}], "inputs": {"feature_names": ["close_scaled", "intraday_return", "range_ratio", "momentum_3", "momentum_5", "volume_scaled", "page_size_scaled", "unique_byte_ratio", "html_tag_ratio", "alpha_ratio", "digit_ratio", "entropy_ratio", "hash_signal"], "market": {"close": 103.95, "high": 105.7, "low": 103.1, "next_close": 105.85, "open": 104.4, "symbol": "AISP", "timestamp": "2026-03-05", "volume": 3010000}, "webpage": {"bytes": 633, "path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}}, "interpreted_actions": ["Convert currency", "Buy shares", "Buy shares", "Sell shares"], "metrics": {"cumulative_pnl": 8.65, "cycles": 4, "loss_abs": 0.0, "stability": 3.3263}, "model_id": "candidate-g0-m0", "mutations": ["lookback:1"], "normalized_outputs": [0.15, 0.25, 0.25, 0.2], "portfolio_state": {"cash": 8835.25, "cumulative_pnl": 8.65, "currency_reserve": 750.0, "shares": 4, "total_value": 10008.65}, "raw_outputs": [0.125252, 0.240095, 0.262809, 0.186055], "role": "candidate", "timestamp_utc": "2026-03-15T12:17:01.579227+00:00", "version": "candidate-g0-m0"}, "candidate-g0-m1": {"cycle_index": 0, "cycle_pnl": 0.0, "execution_log": [{"action": "Explore new/random site", "quantity": 0}, {"action": "Buy shares", "price": 102.85, "quantity": 1}, {"action": "Sell shares", "price": 102.85, "quantity": 1}], "inputs": {"feature_names": ["close_scaled", "intraday_return", "range_ratio", "momentum_3", "momentum_5", "volume_scaled", "page_size_scaled", "unique_byte_ratio", "html_tag_ratio", "alpha_ratio", "digit_ratio", "entropy_ratio", "hash_signal"], "market": {"close": 102.85, "high": 103.4, "low": 100.9, "next_close": 103.55, "open": 101.2, "symbol": "AISP", "timestamp": "2026-03-02", "volume": 2400000}, "webpage": {"bytes": 612, "path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/earnings_signal.html", "sha256": "970f0cc20145a3396b00435d8dbf7591ad6d9a5d3805787b96e5251d6b3c6259"}}, "interpreted_actions": ["Explore new/random site", "Sell shares", "Buy shares", "Sell shares"], "metrics": {"cumulative_pnl": 0.0, "cycles": 1, "loss_abs": 0.0, "stability": 0.0}, "model_id": "candidate-g0-m1", "mutations": ["architecture:contrarian", "lookback:1"], "normalized_outputs": [0.1, 0.2, 0.25, 0.2], "portfolio_state": {"cash": 10000.0, "cumulative_pnl": 0.0, "currency_reserve": 0.0, "shares": 0, "total_value": 10000.0}, "raw_outputs": [0.103752, 0.217659, 0.225338, 0.179756], "role": "candidate", "timestamp_utc": "2026-03-15T12:17:01.576047+00:00", "version": "candidate-g0-m1"}, "candidate-g0-m2": {"cycle_index": 3, "cycle_pnl": 7.6, "execution_log": [{"action": "Explore new/random site", "quantity": 0}, {"action": "Buy shares", "price": 103.95, "quantity": 1}, {"action": "Buy shares", "price": 103.95, "quantity": 1}, {"action": "Sell shares", "price": 103.95, "quantity": 1}], "inputs": {"feature_names": ["close_scaled", "intraday_return", "range_ratio", "momentum_3", "momentum_5", "volume_scaled", "page_size_scaled", "unique_byte_ratio", "html_tag_ratio", "alpha_ratio", "digit_ratio", "entropy_ratio", "hash_signal"], "market": {"close": 103.95, "high": 105.7, "low": 103.1, "next_close": 105.85, "open": 104.4, "symbol": "AISP", "timestamp": "2026-03-05", "volume": 3010000}, "webpage": {"bytes": 633, "path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}}, "interpreted_actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "metrics": {"cumulative_pnl": 8.65, "cycles": 4, "loss_abs": 0.0, "stability": 3.3263}, "model_id": "candidate-g0-m2", "mutations": ["architecture:contrarian", "lookback:5"], "normalized_outputs": [0.1, 0.25, 0.25, 0.2], "portfolio_state": {"cash": 9335.25, "cumulative_pnl": 8.65, "currency_reserve": 250.0, "shares": 4, "total_value": 10008.65}, "raw_outputs": [0.105716, 0.232399, 0.261814, 0.184202], "role": "candidate", "timestamp_utc": "2026-03-15T12:17:01.579323+00:00", "version": "candidate-g0-m2"}, "candidate-g1-m0": {"cycle_index": 3, "cycle_pnl": 9.5, "execution_log": [{"action": "Explore new/random site", "quantity": 0}, {"action": "Buy shares", "price": 103.95, "quantity": 1}, {"action": "Buy shares", "price": 103.95, "quantity": 1}, {"action": "Sell shares", "price": 103.95, "quantity": 1}], "inputs": {"feature_names": ["close_scaled", "intraday_return", "range_ratio", "momentum_3", "momentum_5", "volume_scaled", "page_size_scaled", "unique_byte_ratio", "html_tag_ratio", "alpha_ratio", "digit_ratio", "entropy_ratio", "hash_signal"], "market": {"close": 103.95, "high": 105.7, "low": 103.1, "next_close": 105.85, "open": 104.4, "symbol": "AISP", "timestamp": "2026-03-05", "volume": 3010000}, "webpage": {"bytes": 633, "path": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/data/webpages/supply_chain_watch.html", "sha256": "56e29a54275254d15be3f6aa171f9cc486e389f751f4eeb7c850198d4a59a22f"}}, "interpreted_actions": ["Explore new/random site", "Buy shares", "Buy shares", "Sell shares"], "metrics": {"cumulative_pnl": 11.65, "cycles": 4, "loss_abs": 0.0, "stability": 4.1238}, "model_id": "candidate-g1-m0", "mutations": ["architecture:contrarian", "lookback:5"], "normalized_outputs": [0.1, 0.25, 0.25, 0.2], "portfolio_state": {"cash": 9232.4, "cumulative_pnl": 11.65, "currency_reserve": 250.0, "shares": 5, "total_value": 10011.65}, "raw_outputs": [0.119219, 0.250748, 0.265037, 0.188265], "role": "candidate", "timestamp_utc": "2026-03-15T12:17:01.579427+00:00", "version": "candidate-g1-m0"}}, "performance": {"baseline-v1": [{"cycle": 0, "cycle_pnl": 0.0, "total_value": 10000.0}, {"cycle": 1, "cycle_pnl": 0.85, "total_value": 10000.85}, {"cycle": 2, "cycle_pnl": -0.9, "total_value": 9999.95}, {"cycle": 3, "cycle_pnl": 5.7, "total_value": 10005.65}], "candidate-g0-m0": [{"cycle": 0, "cycle_pnl": 0.7, "total_value": 10000.7}, {"cycle": 1, "cycle_pnl": 1.7, "total_value": 10002.4}, {"cycle": 2, "cycle_pnl": -1.35, "total_value": 10001.05}, {"cycle": 3, "cycle_pnl": 7.6, "total_value": 10008.65}], "candidate-g0-m1": [{"cycle": 0, "cycle_pnl": 0.0, "total_value": 10000.0}], "candidate-g0-m2": [{"cycle": 0, "cycle_pnl": 0.7, "total_value": 10000.7}, {"cycle": 1, "cycle_pnl": 1.7, "total_value": 10002.4}, {"cycle": 2, "cycle_pnl": -1.35, "total_value": 10001.05}, {"cycle": 3, "cycle_pnl": 7.6, "total_value": 10008.65}], "candidate-g1-m0": [{"cycle": 1, "cycle_pnl": 2.55, "total_value": 10003.95}, {"cycle": 2, "cycle_pnl": -1.8, "total_value": 10002.15}, {"cycle": 3, "cycle_pnl": 9.5, "total_value": 10011.65}]}, "promotions": [{"cycle_index": 1, "from_model_id": "baseline-v1", "reason": "Higher profitability or lower sustained losses over the promotion window.", "timestamp_utc": "2026-03-15T12:17:01.577087+00:00", "to_model_id": "candidate-g0-m0"}, {"cycle_index": 3, "from_model_id": "candidate-g0-m0", "reason": "Higher profitability or lower sustained losses over the promotion window.", "timestamp_utc": "2026-03-15T12:17:01.579628+00:00", "to_model_id": "candidate-g1-m0"}], "registry": {"active_model_ids": ["baseline-v1", "candidate-g0-m0", "candidate-g0-m2", "candidate-g1-m0"], "archived_primary_ids": ["baseline-v1", "candidate-g0-m0"], "cloud_deployment": {"status": "TODO", "tracking_doc": "/Users/derinkentkur/PycharmProjects/ai-stock-predictor/docs/CLOUD_TODO.md"}, "models": {"baseline-v1": {"config": {"architecture": "balanced", "bias": [-0.1164, 0.143235, -0.153626, 0.051948], "feature_count": 13, "lookback_window": 3, "model_id": "baseline-v1", "mutations": [], "output_count": 4, "role": "baseline", "seed": 17, "version": "baseline-v1", "weights": [[0.05496, 0.766727, 1.151237, -0.525937, 0.665269, 0.51055, 0.403458, -0.974595, -1.182658, -0.289572, 0.615988, -0.619041, 0.004007], [-0.456412, 0.86582, 1.112985, -0.246023, 1.246118, -1.094518, 0.781523, 0.938291, -0.872711, 0.513922, 0.14723, 1.13797, -0.724975], [0.099908, 0.95614, 0.346933, -0.477001, -1.04534, 1.09944, -0.064754, 1.240815, -0.895982, 0.780511, 0.783445, 1.049938, -1.205414], [-0.319518, -1.120828, 0.630087, -0.363396, 1.148763, -0.312927, 0.685937, 0.919472, -0.652634, 0.142042, 1.14348, 0.067294, -0.35073]]}, "metrics": {"cumulative_pnl": 5.65, "cycles": 4, "loss_abs": 0.0, "stability": 2.5516}, "portfolio": {"cash": 9688.1, "cumulative_pnl": 5.65, "currency_reserve": 0.0, "shares": 3, "total_value": 10005.65}}, "candidate-g0-m0": {"config": {"architecture": "balanced", "bias": [-0.066546, 0.195069, -0.146448, -0.013862], "feature_count": 13, "lookback_window": 1, "model_id": "candidate-g0-m0", "mutations": ["lookback:1"], "output_count": 4, "role": "candidate", "seed": 18, "version": "candidate-g0-m0", "weights": [[0.093703, 0.727021, 1.078743, -0.528453, 0.663837, 0.505695, 0.393457, -1.031108, -1.241746, -0.243521, 0.573853, -0.577084, 0.072929], [-0.368585, 0.972387, 1.049279, -0.309048, 1.302476, -1.076388, 0.709972, 0.980916, -0.783131, 0.594511, 0.079093, 1.089718, -0.843376], [0.214071, 0.889046, 0.401438, -0.467906, -1.022909, 1.105857, 0.013373, 1.264798, -0.943217, 0.68807, 0.778022, 1.151447, -1.290565], [-0.275374, -1.089361, 0.54855, -0.433755, 1.193462, -0.32805, 0.663619, 0.914754, -0.748341, 0.191146, 1.164691, 0.075505, -0.389218]]}, "metrics": {"cumulative_pnl": 8.65, "cycles": 4, "loss_abs": 0.0, "stability": 3.3263}, "portfolio": {"cash": 8835.25, "cumulative_pnl": 8.65, "currency_reserve": 750.0, "shares": 4, "total_value": 10008.65}}, "candidate-g0-m2": {"config": {"architecture": "contrarian", "bias": [-0.17637, 0.187999, -0.165058, 0.007792], "feature_count": 13, "lookback_window": 5, "model_id": "candidate-g0-m2", "mutations": ["architecture:contrarian", "lookback:5"], "output_count": 4, "role": "candidate", "seed": 20, "version": "candidate-g0-m2", "weights": [[0.123763, 0.857918, 1.067526, -0.484175, 0.749111, 0.414914, 0.36204, -0.877292, -1.296183, -0.311954, 0.51399, -0.709022, -0.002136], [-0.437052, 0.844696, 1.040941, -0.215933, 1.289634, -1.13562, 0.683777, 0.942575, -0.790717, 0.491106, 0.076752, 1.076204, -0.796539], [8e-06, 0.896961, 0.410396, -0.523786, -1.103712, 1.12919, 0.032611, 1.185028, -0.959832, 0.862391, 0.801188, 0.943381, -1.133637], [-0.291277, -1.173772, 0.676834, -0.40279, 1.201873, -0.215366, 0.78732, 0.865185, -0.572761, 0.059657, 1.120866, 0.116908, -0.441682]]}, "metrics": {"cumulative_pnl": 8.65, "cycles": 4, "loss_abs": 0.0, "stability": 3.3263}, "portfolio": {"cash": 9335.25, "cumulative_pnl": 8.65, "currency_reserve": 250.0, "shares": 4, "total_value": 10008.65}}, "candidate-g1-m0": {"config": {"architecture": "contrarian", "bias": [-0.167899, 0.201157, -0.15086, 0.00382], "feature_count": 13, "lookback_window": 5, "model_id": "candidate-g1-m0", "mutations": ["architecture:contrarian", "lookback:5"], "output_count": 4, "role": "candidate", "seed": 118, "version": "candidate-g1-m0", "weights": [[-0.021231, 0.670491, 1.118183, -0.461603, 0.618171, 0.603143, 0.429333, -0.972717, -1.156694, -0.27294, 0.620036, -0.543898, 0.048487], [-0.453059, 0.747189, 1.043196, -0.334326, 1.336929, -0.984403, 0.752042, 0.999496, -0.977244, 0.597475, 0.042104, 1.21528, -0.690743], [0.190246, 1.019633, 0.33613, -0.576332, -1.119674, 1.185098, -0.024248, 1.121066, -0.830966, 0.679471, 0.665177, 1.14623, -1.105887], [-0.352887, -1.049818, 0.562494, -0.44034, 1.216245, -0.366502, 0.585443, 1.00779, -0.649017, 0.206764, 1.230916, 0.103082, -0.441577]]}, "metrics": {"cumulative_pnl": 11.65, "cycles": 4, "loss_abs": 0.0, "stability": 4.1238}, "portfolio": {"cash": 9232.4, "cumulative_pnl": 11.65, "currency_reserve": 250.0, "shares": 5, "total_value": 10011.65}}}, "primary_model_id": "candidate-g1-m0", "retired_candidate_ids": ["candidate-g0-m1", "candidate-g2-m0", "candidate-g3-m0", "candidate-g4-m0"]}};
+
+    document.getElementById("archivedCount").textContent = payload.registry.archived_primary_ids.length;
+    document.getElementById("activeCount").textContent = payload.registry.active_model_ids.length;
+    document.getElementById("cycleCount").textContent = payload.cycles.length;
+
+    const allSeries = Object.entries(payload.performance).map(([modelId, series]) => {
+      const latest = series[series.length - 1] || { total_value: 0 };
+      return { modelId, totalValue: latest.total_value };
+    });
+    const maxValue = Math.max(...allSeries.map((entry) => entry.totalValue), 1);
+    const chartRoot = document.getElementById("chart");
+    allSeries
+      .sort((left, right) => right.totalValue - left.totalValue)
+      .forEach((entry) => {
+        const row = document.createElement("div");
+        row.className = "line";
+        const label = document.createElement("div");
+        label.innerHTML = `<strong>${entry.modelId}</strong><div class="muted">$${entry.totalValue.toFixed(2)}</div>`;
+        const track = document.createElement("div");
+        track.className = "track";
+        const fill = document.createElement("div");
+        fill.className = "fill";
+        fill.style.width = `${Math.max(8, (entry.totalValue / maxValue) * 100)}%`;
+        track.appendChild(fill);
+        row.appendChild(label);
+        row.appendChild(track);
+        chartRoot.appendChild(row);
+      });
+
+    const promotionRows = document.getElementById("promotionRows");
+    if (payload.promotions.length === 0) {
+      promotionRows.innerHTML = '<tr><td colspan="4" class="muted">No promotions yet.</td></tr>';
+    } else {
+      payload.promotions.forEach((promotion) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td>${promotion.cycle_index}</td><td>${promotion.from_model_id}</td><td>${promotion.to_model_id}</td><td>${promotion.reason}</td>`;
+        promotionRows.appendChild(row);
+      });
+    }
+
+    const latestRows = document.getElementById("latestRows");
+    Object.values(payload.latest).forEach((record) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${record.model_id}</td><td>${record.role}</td><td>${record.normalized_outputs.join(", ")}</td><td>${record.interpreted_actions.join(" | ")}</td><td>$${record.cycle_pnl.toFixed(2)}</td>`;
+      latestRows.appendChild(row);
+    });
+
+    const ingestionRows = document.getElementById("ingestionRows");
+    payload.ingestion.slice(-12).reverse().forEach((record) => {
+      const webpage = record.webpage_path.split("/").slice(-1)[0];
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${record.cycle_index}</td><td>${record.model_id}</td><td>${webpage}</td><td>${record.actions.join(" | ")}</td>`;
+      ingestionRows.appendChild(row);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+{"cycle_index": 1, "from_model_id": "baseline-v1", "reason": "Higher profitability or lower sustained losses over the promotion window.", "timestamp_utc": "2026-03-15T12:17:01.577087+00:00", "to_model_id": "candidate-g0-m0"}
+{"cycle_index": 3, "from_model_id": "candidate-g0-m0", "reason": "Higher profitability or lower sustained losses over the promotion window.", "timestamp_utc": "2026-03-15T12:17:01.579628+00:00", "to_model_id": "candidate-g1-m0"}
